@@ -16,6 +16,7 @@ import './models/Ingredient.js';
 
 import authRoutes from './routes/auth.routes.js';
 import ingredientsRoutes from './routes/ingredients.routes.js';
+import shoppingListRoutes from './routes/shopping-list.routes.js';
 import { errorHandler } from './middleware/error.middleware.js';
 
 const app = express();
@@ -44,6 +45,7 @@ app.get('/api/health', (_req: Request, res: Response) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/ingredients', ingredientsRoutes);
+app.use('/api/shopping-list', shoppingListRoutes);
 
 /* ------------------------------------------------------------------ */
 /*  404 + central error handler                                        */

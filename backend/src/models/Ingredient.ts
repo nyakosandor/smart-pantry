@@ -19,6 +19,13 @@ const ingredientSchema = new Schema<IIngredient, IngredientModel>(
       trim: true,
       maxlength: [50, 'Category cannot exceed 50 characters'],
     },
+    unit: {
+      type: String,
+      required: [true, 'Unit is required'],
+      trim: true,
+      maxlength: [20, 'Unit cannot exceed 20 characters'],
+      default: 'pcs',
+    },
     quantity: {
       type: Number,
       required: [true, 'Quantity is required'],
@@ -37,6 +44,20 @@ const ingredientSchema = new Schema<IIngredient, IngredientModel>(
       validate: {
         validator: (v: number) => Number.isFinite(v),
         message: 'Calories must be a valid number',
+      },
+    },
+    expirationDate: {
+      type: Date,
+      required: false,
+      default: undefined,
+    },
+    minimumThreshold: {
+      type: Number,
+      required: false,
+      min: [0, 'Minimum threshold cannot be negative'],
+      validate: {
+        validator: (v: number) => Number.isFinite(v),
+        message: 'Minimum threshold must be a valid number',
       },
     },
   },

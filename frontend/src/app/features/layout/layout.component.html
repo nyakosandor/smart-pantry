@@ -1,0 +1,44 @@
+<!-- Primary toolbar -->
+<mat-toolbar color="primary" class="toolbar">
+  <mat-icon class="toolbar-icon">inventory_2</mat-icon>
+  <span class="toolbar-title">Smart Pantry</span>
+
+  <span class="spacer"></span>
+
+  <!-- Navigation links -->
+  <nav class="nav-links" aria-label="Main navigation">
+    <a
+      mat-button
+      routerLink="/dashboard"
+      routerLinkActive="nav-link--active"
+      class="nav-link"
+    >
+      <mat-icon>grid_view</mat-icon>
+      Dashboard
+    </a>
+    <a
+      mat-button
+      routerLink="/shopping-list"
+      routerLinkActive="nav-link--active"
+      class="nav-link"
+    >
+      <mat-icon>shopping_cart</mat-icon>
+      Shopping List
+    </a>
+  </nav>
+
+  <div class="toolbar-user">
+    <span class="user-name">{{ auth.currentUser()?.name }}</span>
+    <button
+      mat-icon-button
+      (click)="auth.logout()"
+      aria-label="Sign out"
+      matTooltip="Sign out"
+    >
+      <mat-icon>logout</mat-icon>
+    </button>
+  </div>
+</mat-toolbar>
+
+<!-- Active page renders here -->
+<router-outlet />

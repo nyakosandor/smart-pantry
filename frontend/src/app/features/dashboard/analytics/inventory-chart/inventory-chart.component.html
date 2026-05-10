@@ -1,0 +1,23 @@
+<mat-card appearance="outlined" class="chart-card">
+  <mat-card-header>
+    <mat-card-title>Inventory by Category</mat-card-title>
+    <mat-card-subtitle>Distribution of pantry items across categories</mat-card-subtitle>
+  </mat-card-header>
+
+  <mat-card-content class="chart-content">
+    @if (isEmpty()) {
+      <p class="chart-empty">No data to display. Add ingredients to see the breakdown.</p>
+    } @else {
+      <div class="chart-wrapper">
+        <canvas
+          baseChart
+          [data]="chartData()"
+          [options]="chartOptions"
+          type="doughnut"
+          role="img"
+          aria-label="Doughnut chart showing ingredient distribution by category"
+        ></canvas>
+      </div>
+    }
+  </mat-card-content>
+</mat-card>
