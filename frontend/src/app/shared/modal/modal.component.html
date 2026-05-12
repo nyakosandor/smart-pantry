@@ -1,0 +1,36 @@
+<!-- Backdrop + centering wrapper -->
+<div
+  class="fixed inset-0 z-40 flex items-center justify-center p-4"
+  (click)="close()"
+>
+  <!-- Backdrop -->
+  <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+
+  <!-- Panel — stopPropagation prevents backdrop click closing on inner clicks -->
+  <div
+    class="relative z-10 w-full max-w-xl overflow-hidden rounded-xl bg-white shadow-2xl"
+    style="animation: modal-in 0.2s ease-out"
+    (click)="$event.stopPropagation()"
+  >
+    <!-- Header -->
+    <div class="flex items-center justify-between border-b border-neutral-200 px-6 py-4">
+      <h2 class="text-base font-semibold text-neutral-900">{{ title() }}</h2>
+      <button
+        type="button"
+        class="btn-ghost"
+        aria-label="Close dialog"
+        (click)="close()"
+      >
+        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none"
+             viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Body — projected content -->
+    <div class="overflow-y-auto px-6 py-5" style="max-height: calc(100dvh - 8rem)">
+      <ng-content />
+    </div>
+  </div>
+</div>

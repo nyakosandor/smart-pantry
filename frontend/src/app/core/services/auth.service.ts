@@ -20,25 +20,11 @@ export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
 
-  // --- Reactive state via signals ---
+  private readonly _token = signal<string | null>(localStorage.getItem(TOKEN_KEY));
+  private readonly _user = signal<AuthUser | null>(AuthService.parseStoredUser());
 
-  /** The raw JWT string, or null when logged out. */
-  private readonly _token = signal<string | null>(
-    localStorage.getItem(TOKEN_KEY),
-  );
-
-  /** The logged-in user, or null when logged out. */
-  private readonly _user = signal<AuthUser | null>(
-    AuthService.parseStoredUser(),
-  );
-
-  /** Public read-only signal: current user. */
   readonly currentUser = this._user.asReadonly();
-
-  /** True when a valid token is present in memory. */
   readonly isLoggedIn = computed(() => this._token() !== null);
-
-  // --- Auth actions ---
 
   register(payload: RegisterRequest): Observable<AuthResponse> {
     return this.http
@@ -60,12 +46,9 @@ export class AuthService {
     void this.router.navigate(['/login']);
   }
 
-  /** Returns the raw token string — used by the JWT interceptor. */
   getToken(): string | null {
     return this._token();
   }
-
-  // --- Private helpers ---
 
   private persistSession(res: AuthResponse): void {
     localStorage.setItem(TOKEN_KEY, res.token);

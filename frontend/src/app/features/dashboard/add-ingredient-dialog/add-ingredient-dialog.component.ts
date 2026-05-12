@@ -1,74 +1,63 @@
-import { Component, inject, signal } from '@angular/core';
 import {
-  FormBuilder,
-  Validators,
-  ReactiveFormsModule,
-} from '@angular/forms';
-import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { provideNativeDateAdapter } from '@angular/material/core';
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  EventEmitter,
+  inject,
+  Output,
+  signal,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 
 import { IngredientService } from '../../../core/services/ingredient.service';
 import { strictNumber } from '../../../core/validators/number.validators';
 import type { Ingredient } from '../../../core/models/ingredient.models';
 
-export type DialogResult = Ingredient | undefined;
-
-/** Preset units shown in the select. The last option allows free-text entry. */
 export const UNITS = [
-  { value: 'pcs',  label: 'pcs — pieces' },
-  { value: 'g',    label: 'g — grams' },
-  { value: 'kg',   label: 'kg — kilograms' },
-  { value: 'ml',   label: 'ml — millilitres' },
-  { value: 'L',    label: 'L — litres' },
-  { value: 'oz',   label: 'oz — ounces' },
-  { value: 'lbs',  label: 'lbs — pounds' },
-  { value: 'cups', label: 'cups' },
-  { value: 'tbsp', label: 'tbsp — tablespoons' },
-  { value: 'tsp',  label: 'tsp — teaspoons' },
+  { value: 'pcs',    label: 'pcs — pieces' },
+  { value: 'g',      label: 'g — grams' },
+  { value: 'kg',     label: 'kg — kilograms' },
+  { value: 'ml',     label: 'ml — millilitres' },
+  { value: 'L',      label: 'L — litres' },
+  { value: 'oz',     label: 'oz — ounces' },
+  { value: 'lbs',    label: 'lbs — pounds' },
+  { value: 'cups',   label: 'cups' },
+  { value: 'tbsp',   label: 'tbsp — tablespoons' },
+  { value: 'tsp',    label: 'tsp — teaspoons' },
   { value: 'slices', label: 'slices' },
 ];
 
 @Component({
   selector: 'app-add-ingredient-dialog',
-  providers: [provideNativeDateAdapter()],
-  imports: [
-    ReactiveFormsModule,
-    MatDialogModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatButtonModule,
-    MatIconModule,
-    MatProgressSpinnerModule,
-    MatDatepickerModule,
-  ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [ReactiveFormsModule],
   templateUrl: './add-ingredient-dialog.component.html',
   styleUrl: './add-ingredient-dialog.component.scss',
 })
 export class AddIngredientDialogComponent {
-  private readonly fb = inject(FormBuilder);
   private readonly ingredientService = inject(IngredientService);
-  private readonly dialogRef = inject(MatDialogRef<AddIngredientDialogComponent>);
+  private readonly destroyRef = inject(DestroyRef);
+
+  /** Emitted when an ingredient is successfully created. */
+  @Output() saved = new EventEmitter<Ingredient>();
+  /** Emitted when the user dismisses the form without saving. */
+  @Output() cancelled = new EventEmitter<void>();
+  /** Emitted when the backend returns an error, so the parent can show a toast. */
+  @Output() saveFailed = new EventEmitter<string>();
 
   readonly isLoading = signal(false);
-  readonly today = new Date();
   readonly units = UNITS;
+  readonly today = new Date().toISOString().split('T')[0];
 
-  readonly form = this.fb.group({
+  readonly form = inject(FormBuilder).group({
     name:             ['', [Validators.required, Validators.minLength(2)]],
     category:         ['', [Validators.required]],
     quantity:         ['', [Validators.required, strictNumber()]],
     unit:             ['pcs', [Validators.required]],
     calories:         ['', [Validators.required, strictNumber()]],
-    expirationDate:   [null as Date | null],
+    expirationDate:   [null as string | null],
     minimumThreshold: ['', [strictNumber()]],
   });
 
@@ -93,27 +82,30 @@ export class AddIngredientDialogComponent {
         quantity: Number(raw.quantity),
         unit:     raw.unit!,
         calories: Number(raw.calories),
-        expirationDate:
-          raw.expirationDate
-            ? (raw.expirationDate as Date).toISOString()
-            : undefined,
+        expirationDate: raw.expirationDate
+          ? new Date(raw.expirationDate).toISOString()
+          : undefined,
         minimumThreshold:
           raw.minimumThreshold !== '' && raw.minimumThreshold !== null
             ? Number(raw.minimumThreshold)
             : undefined,
       })
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (created) => this.dialogRef.close(created),
+        next: (created) => {
+          this.isLoading.set(false);
+          this.saved.emit(created);
+        },
         error: (err: HttpErrorResponse) => {
           this.isLoading.set(false);
-          const message: string =
-            err.error?.message ?? 'Something went wrong. Please try again.';
-          this.dialogRef.close({ __error: message } as unknown as DialogResult);
+          this.saveFailed.emit(
+            err.error?.message ?? 'Something went wrong. Please try again.',
+          );
         },
       });
   }
 
   onCancel(): void {
-    this.dialogRef.close(undefined);
+    this.cancelled.emit();
   }
 }

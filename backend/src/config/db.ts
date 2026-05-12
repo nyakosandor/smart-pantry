@@ -1,10 +1,5 @@
 import mongoose from 'mongoose';
 
-/**
- * Establishes the connection to MongoDB using the URI defined in .env.
- * Exits the process on failure so the server never runs in a half-broken
- * state without a database.
- */
 export const connectDB = async (): Promise<void> => {
   const uri = process.env.MONGO_URI;
 

@@ -10,7 +10,6 @@ import { asyncHandler } from '../utils/asyncHandler.js';
 
 const router = Router();
 
-// Every pantry route requires a valid JWT.
 router.use(requireAuth);
 
 router.get('/', asyncHandler(listIngredients));

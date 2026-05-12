@@ -1,114 +1,143 @@
-<div class="login-page">
-  <mat-card class="login-card" appearance="outlined">
+<div class="min-h-screen bg-neutral-50 flex items-center justify-center px-4 py-12">
+  <div class="w-full max-w-sm">
 
-    <!-- Header -->
-    <mat-card-header>
-      <div class="card-header-content">
-        <div class="logo-mark">
-          <mat-icon class="logo-icon">inventory_2</mat-icon>
-        </div>
-        <mat-card-title>Smart Pantry</mat-card-title>
-        <mat-card-subtitle>
-          {{ isRegisterMode() ? 'Create your account' : 'Sign in to your account' }}
-        </mat-card-subtitle>
+    <!-- Logo + heading -->
+    <div class="mb-8 text-center">
+      <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-brand-600 text-white">
+        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none"
+             viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round"
+                d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
+        </svg>
       </div>
-    </mat-card-header>
+      <h1 class="text-2xl font-semibold tracking-tight text-neutral-900">Smart Pantry</h1>
+      <p class="mt-1 text-sm text-neutral-500">
+        {{ isRegisterMode() ? 'Create your account' : 'Sign in to your account' }}
+      </p>
+    </div>
 
-    <mat-divider />
+    <!-- Card -->
+    <div class="card px-6 py-8">
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate class="space-y-4">
 
-    <!-- Form -->
-    <mat-card-content>
-      <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
-
-        <!-- Name — only shown in register mode -->
+        <!-- Name (register only) -->
         @if (isRegisterMode()) {
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Full name</mat-label>
-            <input matInput formControlName="name" autocomplete="name" />
-            <mat-icon matPrefix>person</mat-icon>
+          <div>
+            <label for="name" class="form-label">Full name</label>
+            <input
+              id="name"
+              type="text"
+              formControlName="name"
+              autocomplete="name"
+              class="form-input"
+              [class.form-input-error]="nameControl.invalid && nameControl.touched"
+              placeholder="Jane Smith"
+            />
             @if (nameControl.hasError('required') && nameControl.touched) {
-              <mat-error>Name is required</mat-error>
+              <p class="form-error">Name is required</p>
             } @else if (nameControl.hasError('minlength') && nameControl.touched) {
-              <mat-error>Name must be at least 2 characters</mat-error>
+              <p class="form-error">Name must be at least 2 characters</p>
             }
-          </mat-form-field>
+          </div>
         }
 
         <!-- Email -->
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Email address</mat-label>
+        <div>
+          <label for="email" class="form-label">Email address</label>
           <input
-            matInput
+            id="email"
             type="email"
             formControlName="email"
             autocomplete="email"
+            class="form-input"
+            [class.form-input-error]="emailControl.invalid && emailControl.touched"
+            placeholder="you@example.com"
           />
-          <mat-icon matPrefix>email</mat-icon>
           @if (emailControl.hasError('required') && emailControl.touched) {
-            <mat-error>Email is required</mat-error>
+            <p class="form-error">Email is required</p>
           } @else if (emailControl.hasError('email') && emailControl.touched) {
-            <mat-error>Please enter a valid email address</mat-error>
+            <p class="form-error">Please enter a valid email address</p>
           }
-        </mat-form-field>
+        </div>
 
         <!-- Password -->
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Password</mat-label>
-          <input
-            matInput
-            [type]="passwordVisible() ? 'text' : 'password'"
-            formControlName="password"
-            [autocomplete]="isRegisterMode() ? 'new-password' : 'current-password'"
-          />
-          <mat-icon matPrefix>lock</mat-icon>
-          <button
-            type="button"
-            mat-icon-button
-            matSuffix
-            (click)="togglePasswordVisibility()"
-            [attr.aria-label]="passwordVisible() ? 'Hide password' : 'Show password'"
-          >
-            <mat-icon>{{ passwordVisible() ? 'visibility_off' : 'visibility' }}</mat-icon>
-          </button>
+        <div>
+          <label for="password" class="form-label">Password</label>
+          <div class="relative">
+            <input
+              id="password"
+              [type]="passwordVisible() ? 'text' : 'password'"
+              formControlName="password"
+              [autocomplete]="isRegisterMode() ? 'new-password' : 'current-password'"
+              class="form-input pr-10"
+              [class.form-input-error]="passwordControl.invalid && passwordControl.touched"
+              placeholder="{{ isRegisterMode() ? 'Min. 6 characters' : '' }}"
+            />
+            <button
+              type="button"
+              class="absolute inset-y-0 right-0 flex items-center px-3 text-neutral-400 hover:text-neutral-600"
+              [attr.aria-label]="passwordVisible() ? 'Hide password' : 'Show password'"
+              (click)="togglePasswordVisibility()"
+            >
+              @if (passwordVisible()) {
+                <!-- eye-slash -->
+                <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none"
+                     viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
+                </svg>
+              } @else {
+                <!-- eye -->
+                <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none"
+                     viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                </svg>
+              }
+            </button>
+          </div>
           @if (passwordControl.hasError('required') && passwordControl.touched) {
-            <mat-error>Password is required</mat-error>
+            <p class="form-error">Password is required</p>
           } @else if (passwordControl.hasError('minlength') && passwordControl.touched) {
-            <mat-error>Password must be at least 6 characters</mat-error>
+            <p class="form-error">Password must be at least 6 characters</p>
           }
-        </mat-form-field>
+        </div>
 
-        <!-- Server-side error message -->
+        <!-- Server error -->
         @if (serverError()) {
-          <p class="server-error">{{ serverError() }}</p>
+          <div class="rounded-md bg-danger-50 border border-danger-100 px-4 py-3">
+            <p class="text-sm text-danger-700">{{ serverError() }}</p>
+          </div>
         }
 
-        <!-- Submit button -->
+        <!-- Submit -->
         <button
-          mat-flat-button
           type="submit"
-          class="full-width submit-btn"
+          class="btn-primary w-full justify-center py-2.5"
           [disabled]="isLoading()"
         >
           @if (isLoading()) {
-            <mat-spinner diameter="20" />
-          } @else {
-            {{ isRegisterMode() ? 'Create account' : 'Sign in' }}
+            <span class="spinner border-white border-t-transparent"></span>
           }
+          {{ isLoading() ? 'Please wait...' : (isRegisterMode() ? 'Create account' : 'Sign in') }}
         </button>
+
       </form>
-    </mat-card-content>
+    </div>
 
-    <mat-divider />
+    <!-- Toggle mode -->
+    <p class="mt-6 text-center text-sm text-neutral-500">
+      {{ isRegisterMode() ? 'Already have an account?' : 'No account yet?' }}
+      <button
+        type="button"
+        class="ml-1 font-medium text-brand-600 hover:text-brand-700 hover:underline"
+        (click)="toggleMode()"
+      >
+        {{ isRegisterMode() ? 'Sign in' : 'Register' }}
+      </button>
+    </p>
 
-    <!-- Toggle login / register -->
-    <mat-card-actions align="end">
-      <p class="toggle-text">
-        {{ isRegisterMode() ? 'Already have an account?' : 'No account yet?' }}
-        <button mat-button type="button" (click)="toggleMode()">
-          {{ isRegisterMode() ? 'Sign in' : 'Register' }}
-        </button>
-      </p>
-    </mat-card-actions>
-
-  </mat-card>
+  </div>
 </div>

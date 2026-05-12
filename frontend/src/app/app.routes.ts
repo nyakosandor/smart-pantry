@@ -5,18 +5,13 @@ export const routes: Routes = [
   {
     path: 'login',
     loadComponent: () =>
-      import('./features/auth/login/login.component').then(
-        (m) => m.LoginComponent,
-      ),
+      import('./features/auth/login/login.component').then((m) => m.LoginComponent),
   },
   {
-    /* The shared layout (toolbar + nav) wraps all authenticated pages. */
     path: '',
     canActivate: [authGuard],
     loadComponent: () =>
-      import('./features/layout/layout.component').then(
-        (m) => m.LayoutComponent,
-      ),
+      import('./features/layout/layout.component').then((m) => m.LayoutComponent),
     children: [
       {
         path: 'dashboard',

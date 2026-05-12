@@ -1,46 +1,269 @@
-// Include theming for Angular Material with `mat.theme()`.
-// This Sass mixin will define CSS variables that are used for styling Angular Material
-// components according to the Material 3 design spec.
-// Learn more about theming and how to use it for your application's
-// custom components at https://material.angular.dev/guide/theming
-@use '@angular/material' as mat;
+@import "tailwindcss";
 
-html {
-  height: 100%;
-  @include mat.theme(
-    (
-      color: (
-        primary: mat.$azure-palette,
-        tertiary: mat.$blue-palette,
-      ),
-      typography: Roboto,
-      density: 0,
-    )
-  );
+/*
+  Design tokens — Tailwind v4 custom theme.
+  All values below become utility classes automatically:
+    bg-brand-600, text-danger-600, border-neutral-200, etc.
+*/
+@theme {
+  /* Brand (primary action) — slate-blue */
+  --color-brand-50:  #f0f4ff;
+  --color-brand-100: #e0e9ff;
+  --color-brand-200: #c7d7fe;
+  --color-brand-300: #a4bcfd;
+  --color-brand-400: #8098f9;
+  --color-brand-500: #6172f3;
+  --color-brand-600: #444ce7;
+  --color-brand-700: #3538cd;
+  --color-brand-800: #2d31a6;
+  --color-brand-900: #2d3282;
+  --color-brand-950: #1f2064;
+
+  /* Neutral (surfaces, text, borders) */
+  --color-neutral-0:   #ffffff;
+  --color-neutral-50:  #f8fafc;
+  --color-neutral-100: #f1f5f9;
+  --color-neutral-200: #e2e8f0;
+  --color-neutral-300: #cbd5e1;
+  --color-neutral-400: #94a3b8;
+  --color-neutral-500: #64748b;
+  --color-neutral-600: #475569;
+  --color-neutral-700: #334155;
+  --color-neutral-800: #1e293b;
+  --color-neutral-900: #0f172a;
+
+  /* Semantic */
+  --color-danger-50:  #fef2f2;
+  --color-danger-100: #fee2e2;
+  --color-danger-300: #fca5a5;
+  --color-danger-400: #f87171;
+  --color-danger-500: #ef4444;
+  --color-danger-600: #dc2626;
+  --color-danger-700: #b91c1c;
+
+  --color-warning-50:  #fffbeb;
+  --color-warning-100: #fef3c7;
+  --color-warning-300: #fcd34d;
+  --color-warning-400: #fbbf24;
+  --color-warning-500: #f59e0b;
+  --color-warning-600: #d97706;
+  --color-warning-700: #b45309;
+
+  --color-success-50:  #f0fdf4;
+  --color-success-100: #dcfce7;
+  --color-success-400: #4ade80;
+  --color-success-600: #16a34a;
+  --color-success-700: #15803d;
+
+  /* Typography */
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  /* Border radius */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
 }
 
-body {
-  // Default the application to a light color theme. This can be changed to
-  // `dark` to enable the dark color theme, or to `light dark` to defer to the
-  // user's system settings.
-  color-scheme: light;
+/* Base layer resets */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
 
-  // Set a default background, font and text colors for the application using
-  // Angular Material's system-level CSS variables. Learn more about these
-  // variables at https://material.angular.dev/guide/system-variables
-  background-color: var(--mat-sys-surface);
-  color: var(--mat-sys-on-surface);
-  font: var(--mat-sys-body-medium);
+  html {
+    font-family: var(--font-sans);
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+  }
 
-  // Reset the user agent margin.
-  margin: 0;
-  height: 100%;
+  body {
+    margin: 0;
+    background-color: var(--color-neutral-50);
+    color: var(--color-neutral-800);
+  }
+
+  h1, h2, h3, h4 {
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--color-neutral-900);
+  }
 }
-/* You can add global styles to this file, and also import other style files */
 
-/* Error snackbar — applied via panelClass: ['snack-error'] */
-.snack-error {
-  --mdc-snackbar-container-color: var(--mat-sys-error-container);
-  --mdc-snackbar-supporting-text-color: var(--mat-sys-on-error-container);
-  --mat-snack-bar-button-color: var(--mat-sys-on-error-container);
+/* Shared component classes */
+@layer components {
+  /* Primary button */
+  .btn-primary {
+    @apply inline-flex items-center gap-2 rounded-md bg-brand-600 px-4 py-2
+           text-sm font-medium text-white shadow-sm transition-colors
+           hover:bg-brand-700 focus:outline-none focus:ring-2
+           focus:ring-brand-500 focus:ring-offset-2
+           disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  /* Secondary / outlined button */
+  .btn-secondary {
+    @apply inline-flex items-center gap-2 rounded-md border border-neutral-300
+           bg-neutral-0 px-4 py-2 text-sm font-medium text-neutral-700
+           shadow-sm transition-colors hover:bg-neutral-50
+           focus:outline-none focus:ring-2 focus:ring-brand-500
+           focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  /* Ghost / icon-only button */
+  .btn-ghost {
+    @apply inline-flex items-center justify-center rounded-md p-1.5
+           text-neutral-500 transition-colors hover:bg-neutral-100
+           hover:text-neutral-700 focus:outline-none focus:ring-2
+           focus:ring-brand-500 disabled:cursor-not-allowed disabled:opacity-40;
+  }
+
+  /* Danger button */
+  .btn-danger {
+    @apply inline-flex items-center gap-2 rounded-md bg-danger-600 px-4 py-2
+           text-sm font-medium text-white shadow-sm transition-colors
+           hover:bg-danger-700 focus:outline-none focus:ring-2
+           focus:ring-danger-400 focus:ring-offset-2
+           disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  /* Form input */
+  .form-input {
+    @apply block w-full rounded-md border border-neutral-300 bg-neutral-0
+           px-3 py-2 text-sm text-neutral-900 shadow-sm
+           placeholder:text-neutral-400
+           focus:border-brand-500 focus:outline-none focus:ring-1
+           focus:ring-brand-500;
+  }
+
+  .form-select {
+    @apply block w-full rounded-md border border-neutral-300 bg-neutral-0
+           px-3 py-2 text-sm text-neutral-900 shadow-sm
+           focus:border-brand-500 focus:outline-none focus:ring-1
+           focus:ring-brand-500 cursor-pointer;
+  }
+
+  .form-input-error {
+    @apply border-danger-600 focus:border-danger-600 focus:ring-danger-400;
+  }
+
+  .form-label {
+    @apply block text-sm font-medium text-neutral-700 mb-1;
+  }
+
+  .form-error {
+    @apply mt-1 text-xs text-danger-600;
+  }
+
+  /* Inline loading spinner */
+  .spinner {
+    @apply inline-block h-4 w-4 animate-spin rounded-full
+           border-2 border-current border-t-transparent;
+  }
+
+  /* Card */
+  .card {
+    @apply rounded-lg border border-neutral-200 bg-neutral-0 shadow-sm;
+  }
+
+  /* Page layout wrapper */
+  .page-content {
+    @apply mx-auto max-w-screen-xl px-6 py-8;
+  }
+
+  /* Table */
+  .data-table {
+    @apply w-full border-collapse text-sm;
+  }
+
+  .data-table thead tr {
+    @apply border-b border-neutral-200 bg-neutral-50;
+  }
+
+  .data-table thead th {
+    @apply px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider
+           text-neutral-500;
+  }
+
+  .data-table tbody tr {
+    @apply border-b border-neutral-100 transition-colors hover:bg-neutral-50;
+  }
+
+  .data-table tbody td {
+    @apply px-4 py-3 text-neutral-700;
+  }
+
+  /* Navigation link — used in the top navbar */
+  .nav-link {
+    @apply inline-flex items-center gap-2 rounded-md px-3 py-2
+           text-sm font-medium text-neutral-600 transition-colors
+           hover:bg-neutral-100 hover:text-neutral-900;
+  }
+
+  .nav-link.nav-active {
+    @apply bg-neutral-100 text-neutral-900;
+  }
+
+  /* Mobile navigation link */
+  .nav-link-mobile {
+    @apply flex items-center gap-3 rounded-md px-3 py-2.5
+           text-sm font-medium text-neutral-600 transition-colors
+           hover:bg-neutral-100 hover:text-neutral-900;
+  }
+
+  .nav-link-mobile.nav-active {
+    @apply bg-brand-50 text-brand-700;
+  }
+
+  /* Badge */
+  .badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5
+           text-xs font-medium;
+  }
+
+  .badge-neutral {
+    @apply bg-neutral-100 text-neutral-600;
+  }
+
+  .badge-warning {
+    @apply bg-warning-100 text-warning-700;
+  }
+
+  .badge-danger {
+    @apply bg-danger-100 text-danger-700;
+  }
+
+  /* Indeterminate loading bar */
+  .progress-bar-indeterminate {
+    @apply relative h-0.5 w-full overflow-hidden bg-brand-100;
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 40%;
+      background-color: var(--color-brand-500);
+      animation: progress-slide 1.4s ease-in-out infinite;
+    }
+  }
+}
+
+@keyframes progress-slide {
+  0%   { transform: translateX(-150%); }
+  50%  { transform: translateX(150%); }
+  100% { transform: translateX(350%); }
+}
+
+@keyframes modal-in {
+  from { opacity: 0; transform: scale(0.96) translateY(-6px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0);    }
+}
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateX(calc(100% + 1.5rem)); }
+  to   { opacity: 1; transform: translateX(0); }
 }

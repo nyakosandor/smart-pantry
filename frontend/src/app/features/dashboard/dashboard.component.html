@@ -1,182 +1,228 @@
-<div class="dashboard-content">
+<div class="page-content space-y-6">
 
-  <!-- Analytics row -->
-  <div class="analytics-row">
-    <app-inventory-chart [ingredients]="ingredients()" class="chart-col" />
+  <!-- ================================================================
+       Analytics row: chart + stat cards
+       ================================================================ -->
+  <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
 
-    <!-- Summary stat cards -->
-    <div class="stat-col">
-
-      <mat-card appearance="outlined" class="stat-card">
-        <mat-card-content>
-          <p class="stat-label">Total items</p>
-          <p class="stat-value">{{ rowCount() }}</p>
-        </mat-card-content>
-      </mat-card>
-
-      <mat-card appearance="outlined" class="stat-card stat-card--warn">
-        <mat-card-content>
-          <p class="stat-label">Expiring within 7 days</p>
-          <p class="stat-value">{{ expiringSoonCount() }}</p>
-        </mat-card-content>
-      </mat-card>
-
+    <!-- Doughnut chart -->
+    <div class="lg:col-span-2">
+      <app-inventory-chart [ingredients]="ingredients()" class="block h-full" />
     </div>
+
+    <!-- Stat cards -->
+    <div class="flex flex-col gap-4">
+      <div class="card flex-1 px-5 py-4">
+        <p class="text-xs font-semibold uppercase tracking-wider text-neutral-400">Total items</p>
+        <p class="mt-2 text-4xl font-semibold text-neutral-900">{{ rowCount() }}</p>
+      </div>
+
+      <div
+        class="card flex-1 px-5 py-4"
+        [class.border-warning-300]="expiringSoonCount() > 0"
+      >
+        <p class="text-xs font-semibold uppercase tracking-wider text-neutral-400">Expiring within 7 days</p>
+        <p
+          class="mt-2 text-4xl font-semibold"
+          [class.text-warning-600]="expiringSoonCount() > 0"
+          [class.text-neutral-900]="expiringSoonCount() === 0"
+        >{{ expiringSoonCount() }}</p>
+      </div>
+    </div>
+
   </div>
 
-  <!-- Page title row -->
-  <div class="page-header">
+  <!-- ================================================================
+       Page header + action buttons
+       ================================================================ -->
+  <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
     <div>
-      <h1 class="page-title">Ingredient Inventory</h1>
-      <p class="page-subtitle">
+      <h1 class="text-xl font-semibold text-neutral-900">Ingredient Inventory</h1>
+      <p class="mt-0.5 text-sm text-neutral-500">
         {{ rowCount() }} ingredient{{ rowCount() === 1 ? '' : 's' }} on record
       </p>
     </div>
-    <button mat-flat-button class="add-btn" (click)="openAddDialog()">
-      <mat-icon>add</mat-icon>
-      Add Ingredient
-    </button>
+
+    <div class="flex shrink-0 items-center gap-2">
+      <!-- What Can I Cook? -->
+      <button
+        class="btn-secondary"
+        [disabled]="isLoadingRecipes() || rowCount() === 0"
+        (click)="loadRecipeSuggestions()"
+        title="Find recipes you can make with your current pantry"
+      >
+        @if (isLoadingRecipes()) {
+          <span class="spinner"></span>
+        } @else {
+          <!-- sparkles icon -->
+          <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none"
+               viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
+          </svg>
+        }
+        {{ isLoadingRecipes() ? 'Searching...' : 'What Can I Cook?' }}
+      </button>
+
+      <!-- Add ingredient -->
+      <button class="btn-primary" (click)="showAddModal.set(true)">
+        <!-- plus icon -->
+        <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none"
+             viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+        </svg>
+        Add Ingredient
+      </button>
+    </div>
   </div>
 
-  <!-- Table card -->
-  <mat-card appearance="outlined" class="table-card">
+  <!-- ================================================================
+       Add ingredient modal
+       ================================================================ -->
+  @if (showAddModal()) {
+    <app-modal title="Add New Ingredient" (closed)="showAddModal.set(false)">
+      <app-add-ingredient-dialog
+        (saved)="onIngredientSaved($event)"
+        (cancelled)="showAddModal.set(false)"
+        (saveFailed)="onIngredientSaveFailed($event)"
+      />
+    </app-modal>
+  }
 
+  <!-- ================================================================
+       Recipe suggestions
+       ================================================================ -->
+  @if (recipes() !== null) {
+    <app-recipe-suggestions [recipes]="recipes()!" />
+  }
+
+  <!-- ================================================================
+       Inventory table card
+       ================================================================ -->
+  <div class="card overflow-hidden">
+
+    <!-- Indeterminate loading bar -->
     @if (isLoading()) {
-      <mat-progress-bar mode="indeterminate" />
+      <div class="progress-bar-indeterminate"></div>
     }
 
+    <!-- Error banner -->
     @if (errorMessage()) {
-      <div class="state-banner error-banner">
-        <mat-icon>error_outline</mat-icon>
-        <span>{{ errorMessage() }}</span>
-        <button mat-stroked-button (click)="loadIngredients()">Retry</button>
+      <div class="flex items-center gap-3 border-b border-danger-100 bg-danger-50 px-5 py-4">
+        <svg class="h-5 w-5 shrink-0 text-danger-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+          <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12ZM12 8.25a.75.75 0 0 1 .75.75v3.75a.75.75 0 0 1-1.5 0V9a.75.75 0 0 1 .75-.75Zm0 8.25a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z" clip-rule="evenodd" />
+        </svg>
+        <span class="flex-1 text-sm text-danger-700">{{ errorMessage() }}</span>
+        <button class="btn-secondary" (click)="loadIngredients()">Retry</button>
       </div>
     }
 
+    <!-- Empty state -->
     @if (isEmpty()) {
-      <div class="state-banner empty-banner">
-        <mat-icon class="empty-icon">inbox</mat-icon>
-        <p class="empty-title">No ingredients found</p>
-        <p class="empty-hint">
-          Use the <strong>Add Ingredient</strong> button above to add your first entry.
+      <div class="flex flex-col items-center gap-2 px-6 py-16 text-center">
+        <svg class="h-10 w-10 text-neutral-300" xmlns="http://www.w3.org/2000/svg" fill="none"
+             viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round"
+                d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
+        </svg>
+        <p class="text-sm font-medium text-neutral-700">No ingredients found</p>
+        <p class="text-sm text-neutral-400">
+          Use the <strong class="font-medium text-neutral-600">Add Ingredient</strong> button above to add your first entry.
         </p>
       </div>
     }
 
-    <div class="table-wrapper">
-      <table
-        mat-table
-        [dataSource]="dataSource"
-        matSort
-        class="pantry-table"
-        aria-label="Ingredient inventory"
-      >
+    <!-- Data table -->
+    @if (!isEmpty() && !isLoading()) {
+      <div class="overflow-x-auto">
+        <table class="data-table" aria-label="Ingredient inventory">
+          <thead>
+            <tr>
+              <th class="w-8"></th>
+              <th>Name</th>
+              <th>Category</th>
+              <th class="text-right">Quantity</th>
+              <th class="text-right">Calories</th>
+              <th>Expires</th>
+              <th class="w-16"></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of ingredients(); track row._id) {
+              <tr
+                [class.bg-warning-50]="getExpiryStatus(row._id) === 'expiring'"
+                [class.bg-danger-50]="getExpiryStatus(row._id) === 'expired'"
+              >
+                <!-- Expiry status dot -->
+                <td class="px-4 py-3">
+                  @if (getExpiryStatus(row._id) === 'expired') {
+                    <span class="block h-2 w-2 rounded-full bg-danger-500" title="Expired"></span>
+                  } @else if (getExpiryStatus(row._id) === 'expiring') {
+                    <span class="block h-2 w-2 rounded-full bg-warning-500" title="Expiring soon"></span>
+                  }
+                </td>
 
-        <!-- Status indicator column (expiry warning) -->
-        <ng-container matColumnDef="status">
-          <th mat-header-cell *matHeaderCellDef class="status-header"></th>
-          <td mat-cell *matCellDef="let row" class="status-cell">
-            @if (expiryStatus(row.expirationDate) === 'expired') {
-              <mat-icon
-                class="status-icon status-icon--expired"
-                matTooltip="Expired"
-                aria-label="Expired"
-              >error</mat-icon>
-            } @else if (expiryStatus(row.expirationDate) === 'expiring') {
-              <mat-icon
-                class="status-icon status-icon--expiring"
-                matTooltip="Expiring within 7 days"
-                aria-label="Expiring soon"
-              >warning</mat-icon>
+                <!-- Name -->
+                <td class="font-medium text-neutral-900">{{ row.name }}</td>
+
+                <!-- Category -->
+                <td>
+                  <span class="badge badge-neutral">{{ row.category }}</span>
+                </td>
+
+                <!-- Quantity -->
+                <td class="text-right tabular-nums">
+                  {{ row.quantity }}<span class="ml-1 text-neutral-400 text-xs">{{ row.unit }}</span>
+                </td>
+
+                <!-- Calories -->
+                <td class="text-right tabular-nums">
+                  {{ row.calories }}<span class="ml-1 text-neutral-400 text-xs">kcal</span>
+                </td>
+
+                <!-- Expiry date -->
+                <td
+                  [class.text-warning-700]="getExpiryStatus(row._id) === 'expiring'"
+                  [class.font-medium]="getExpiryStatus(row._id) === 'expiring'"
+                  [class.text-danger-700]="getExpiryStatus(row._id) === 'expired'"
+                >
+                  @if (row.expirationDate) {
+                    {{ row.expirationDate | date: 'dd MMM yyyy' }}
+                  } @else {
+                    <span class="text-neutral-300">—</span>
+                  }
+                </td>
+
+                <!-- Delete action -->
+                <td class="pr-4">
+                  <div class="flex justify-end">
+                    <button
+                      class="btn-ghost text-neutral-400 hover:text-danger-600"
+                      aria-label="Remove ingredient"
+                      title="Remove"
+                      [disabled]="deletingId() === row._id"
+                      (click)="deleteIngredient(row)"
+                    >
+                      @if (deletingId() === row._id) {
+                        <span class="spinner"></span>
+                      } @else {
+                        <!-- trash icon -->
+                        <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none"
+                             viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round"
+                                d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                        </svg>
+                      }
+                    </button>
+                  </div>
+                </td>
+              </tr>
             }
-          </td>
-        </ng-container>
+          </tbody>
+        </table>
+      </div>
+    }
 
-        <!-- Name column -->
-        <ng-container matColumnDef="name">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
-          <td mat-cell *matCellDef="let row">
-            <span class="ingredient-name">{{ row.name }}</span>
-          </td>
-        </ng-container>
+  </div>
 
-        <!-- Category column -->
-        <ng-container matColumnDef="category">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Category</th>
-          <td mat-cell *matCellDef="let row">
-            <span class="category-label">{{ row.category }}</span>
-          </td>
-        </ng-container>
-
-        <!-- Quantity column -->
-        <ng-container matColumnDef="quantity">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header arrowPosition="before" class="numeric-header">
-            Quantity
-          </th>
-          <td mat-cell *matCellDef="let row" class="numeric-cell">
-            {{ row.quantity }}<span class="unit"> {{ row.unit }}</span>
-          </td>
-        </ng-container>
-
-        <!-- Calories column -->
-        <ng-container matColumnDef="calories">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header arrowPosition="before" class="numeric-header">
-            Calories
-          </th>
-          <td mat-cell *matCellDef="let row" class="numeric-cell">
-            {{ row.calories }}<span class="unit"> kcal</span>
-          </td>
-        </ng-container>
-
-        <!-- Expiration Date column -->
-        <ng-container matColumnDef="expirationDate">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Expires</th>
-          <td
-            mat-cell
-            *matCellDef="let row"
-            [class.cell--expiring]="expiryStatus(row.expirationDate) === 'expiring'"
-            [class.cell--expired]="expiryStatus(row.expirationDate) === 'expired'"
-          >
-            @if (row.expirationDate) {
-              {{ row.expirationDate | date: 'dd MMM yyyy' }}
-            } @else {
-              <span class="no-date">—</span>
-            }
-          </td>
-        </ng-container>
-
-        <!-- Actions column -->
-        <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef></th>
-          <td mat-cell *matCellDef="let row" class="actions-cell">
-            <button
-              mat-icon-button
-              class="delete-btn"
-              aria-label="Remove ingredient"
-              matTooltip="Remove"
-              [disabled]="deletingId() === row._id"
-              (click)="deleteIngredient(row)"
-            >
-              @if (deletingId() === row._id) {
-                <mat-spinner diameter="18" />
-              } @else {
-                <mat-icon>delete_outline</mat-icon>
-              }
-            </button>
-          </td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
-        <tr
-          mat-row
-          *matRowDef="let row; columns: displayedColumns"
-          class="table-row"
-          [class.row--expiring]="expiryStatus(row.expirationDate) === 'expiring'"
-          [class.row--expired]="expiryStatus(row.expirationDate) === 'expired'"
-        ></tr>
-
-      </table>
-    </div>
-
-  </mat-card>
 </div>

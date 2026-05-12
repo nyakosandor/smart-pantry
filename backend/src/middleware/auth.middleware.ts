@@ -1,10 +1,6 @@
 import type { Request, Response, NextFunction } from 'express';
 import { verifyToken } from '../utils/jwt.js';
 
-/**
- * Protects routes by validating the `Authorization: Bearer <token>` header.
- * On success, attaches the decoded payload to `req.user`.
- */
 export const requireAuth = (
   req: Request,
   res: Response,

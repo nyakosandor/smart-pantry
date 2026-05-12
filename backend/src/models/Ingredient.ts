@@ -30,8 +30,8 @@ const ingredientSchema = new Schema<IIngredient, IngredientModel>(
       type: Number,
       required: [true, 'Quantity is required'],
       min: [0, 'Quantity cannot be negative'],
-      // Mongoose auto-casts strings to Number; we want to reject anything
-      // that is not a finite number to keep the data clean.
+      // Mongoose auto-casts strings to Number; the custom validator rejects
+      // anything that does not produce a finite result (e.g. "abc", Infinity).
       validate: {
         validator: (v: number) => Number.isFinite(v),
         message: 'Quantity must be a valid number',
@@ -63,10 +63,6 @@ const ingredientSchema = new Schema<IIngredient, IngredientModel>(
   },
   { timestamps: true },
 );
-
-// Note: the unique index on `name` is created automatically by `unique: true`
-// on the field above. It triggers a MongoDB E11000 error on duplicates, which
-// the central error middleware maps to a 409 response.
 
 export type IngredientDocument = HydratedDocument<IIngredient>;
 

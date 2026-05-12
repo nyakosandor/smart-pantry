@@ -1,0 +1,115 @@
+<section>
+  <div class="mb-4 flex items-baseline justify-between">
+    <div>
+      <h2 class="text-base font-semibold text-neutral-900">Recipe Suggestions</h2>
+      <p class="mt-0.5 text-sm text-neutral-500">
+        Based on your current pantry —
+        {{ recipes().length }} recipe{{ recipes().length === 1 ? '' : 's' }} found
+      </p>
+    </div>
+  </div>
+
+  @if (recipes().length === 0) {
+    <div class="card flex flex-col items-center gap-2 px-6 py-12 text-center">
+      <!-- book-open icon -->
+      <svg class="h-8 w-8 text-neutral-300" xmlns="http://www.w3.org/2000/svg" fill="none"
+           viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round"
+              d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+      </svg>
+      <p class="text-sm text-neutral-500">No recipes could be found for your current ingredients.</p>
+    </div>
+  } @else {
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      @for (recipe of recipes(); track recipe.id) {
+        <div class="card flex flex-col overflow-hidden">
+
+          <!-- Clickable image -->
+          <a
+            [href]="recipeUrl(recipe)"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="group relative block aspect-video overflow-hidden bg-neutral-100"
+            [attr.aria-label]="'View recipe: ' + recipe.title"
+          >
+            <img
+              [src]="recipe.image"
+              [alt]="recipe.title"
+              [title]="recipe.title"
+              class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+              loading="lazy"
+            />
+            <!-- Ingredient match badge -->
+            <div class="absolute bottom-2 right-2 flex items-center gap-1 rounded
+                        bg-black/60 px-2 py-0.5 text-xs font-medium text-white backdrop-blur-sm">
+              <!-- check-circle icon -->
+              <svg class="h-3.5 w-3.5 text-success-400" xmlns="http://www.w3.org/2000/svg"
+                   viewBox="0 0 24 24" fill="currentColor">
+                <path fill-rule="evenodd"
+                      d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z"
+                      clip-rule="evenodd" />
+              </svg>
+              {{ recipe.usedIngredientCount }} /
+              {{ recipe.usedIngredientCount + recipe.missedIngredientCount }}
+              ingredients
+            </div>
+          </a>
+
+          <!-- Card body -->
+          <div class="flex flex-1 flex-col gap-3 p-4">
+            <!-- Title -->
+            <a
+              [href]="recipeUrl(recipe)"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="line-clamp-2 text-sm font-semibold text-neutral-900 hover:text-brand-600 hover:underline"
+            >{{ recipe.title }}</a>
+
+            <!-- Missing ingredients -->
+            @if (recipe.missedIngredients.length > 0) {
+              <div class="border-t border-neutral-100 pt-3">
+                <p class="mb-1.5 text-xs font-semibold uppercase tracking-wider text-neutral-400">
+                  Still needed ({{ recipe.missedIngredients.length }})
+                </p>
+                <ul class="flex flex-wrap gap-1.5">
+                  @for (item of recipe.missedIngredients; track item) {
+                    <li class="rounded-full bg-danger-50 px-2.5 py-0.5 text-xs text-danger-700">
+                      {{ item }}
+                    </li>
+                  }
+                </ul>
+              </div>
+            } @else {
+              <div class="flex items-center gap-1.5 border-t border-neutral-100 pt-3 text-xs font-medium text-success-600">
+                <!-- check icon -->
+                <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                  <path fill-rule="evenodd"
+                        d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z"
+                        clip-rule="evenodd" />
+                </svg>
+                You have all the ingredients
+              </div>
+            }
+
+            <!-- View recipe link -->
+            <a
+              [href]="recipeUrl(recipe)"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="btn-secondary mt-auto w-full justify-center text-center"
+            >
+              <!-- external-link icon -->
+              <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none"
+                   viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+              </svg>
+              View Recipe
+            </a>
+          </div>
+
+        </div>
+      }
+    </div>
+  }
+</section>

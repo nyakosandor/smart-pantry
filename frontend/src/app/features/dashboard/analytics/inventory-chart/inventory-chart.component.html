@@ -1,14 +1,14 @@
-<mat-card appearance="outlined" class="chart-card">
-  <mat-card-header>
-    <mat-card-title>Inventory by Category</mat-card-title>
-    <mat-card-subtitle>Distribution of pantry items across categories</mat-card-subtitle>
-  </mat-card-header>
+<div class="card flex h-full flex-col">
+  <div class="border-b border-neutral-200 px-5 py-4">
+    <h3 class="text-sm font-semibold text-neutral-900">Inventory by Category</h3>
+    <p class="mt-0.5 text-xs text-neutral-500">Distribution of pantry items across categories</p>
+  </div>
 
-  <mat-card-content class="chart-content">
+  <div class="flex flex-1 items-center justify-center px-5 py-4">
     @if (isEmpty()) {
-      <p class="chart-empty">No data to display. Add ingredients to see the breakdown.</p>
+      <p class="text-sm text-neutral-400">No data to display. Add ingredients to see the breakdown.</p>
     } @else {
-      <div class="chart-wrapper">
+      <div class="relative h-56 w-full">
         <canvas
           baseChart
           [data]="chartData()"
@@ -19,5 +19,5 @@
         ></canvas>
       </div>
     }
-  </mat-card-content>
-</mat-card>
+  </div>
+</div>
